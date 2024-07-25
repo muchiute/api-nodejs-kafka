@@ -1,0 +1,16 @@
+{
+  "type": "record",
+  "name": "Message",
+  "fields": [
+    {
+      "name": "key",
+      "type": ["null", "string", "int"],
+      "default": null
+    },
+    {
+      "name": "value",
+      "type": ["null", "string", "int"],
+      "default": null
+    }
+  ]
+}

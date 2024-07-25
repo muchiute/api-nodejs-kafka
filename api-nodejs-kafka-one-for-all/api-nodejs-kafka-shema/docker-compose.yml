@@ -1,0 +1,119 @@
+version: '3.8'
+services:
+  redpanda:
+    image: vectorized/redpanda:latest
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - '1'
+      - --memory
+      - 1G
+      - --reserve-memory
+      - 0M
+      - --node-id
+      - '0'
+      - --check=false
+      - --advertise-kafka-addr
+      - redpanda:9092
+    ports:
+      - "9092:9092"
+      - "9644:9644"
+ 
+  schema-registry:
+    image: apicurio/apicurio-registry-sql:2.0.0.Final
+    environment:
+      - QUARKUS_PROFILE=prod
+      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:h2:mem:registry
+      - QUARKUS_DATASOURCE_USERNAME=sa
+      - QUARKUS_DATASOURCE_PASSWORD=sa
+      - REGISTRY_STORAGE=sql
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redpanda
+ 
+  redpanda-console:
+    image: docker.redpanda.com/vectorized/console:latest
+    container_name: redpanda-console
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_BROKERS: 'redpanda:9092'
+      KAFKA_TLS_ENABLED: 'false'
+      REDPANDA_CONSOLE_TLS_ENABLED: 'false'
+      CONNECT_ENABLED: 'false'
+      SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "redpanda:9092"
+      SCHEMA_REGISTRY_HOST_NAME: "schema-registry"
+    depends_on:
+      - redpanda
+      - schema-registry
+ 
+  kafka-init:
+    image: vectorized/redpanda:latest
+    depends_on:
+      - redpanda
+    # entrypoint: >
+    #   sh -c "
+    #   rpk topic create my-topic --brokers=redpanda:9092
+    #   "
+       
+  producer:
+    build:
+      context: ./producer
+    volumes:
+      - ./producer:/app
+    depends_on:
+      - redpanda
+ 
+  consumer:
+    build:
+      context: ./consumer
+    volumes:
+      - ./consumer:/app
+    depends_on:
+      - redpanda
+    ports:
+      - "3002:3002"
+
+  consumerdrain:
+    build:
+      context: ./consumerdrain
+    volumes:
+      - ./consumerdrain:/app
+    depends_on:
+      - redpanda
+    ports:
+      - "3003:3003"
+
+  consumernew:
+    build:
+      context: ./consumernew
+    volumes:
+      - ./consumernew:/app
+    depends_on:
+      - redpanda
+    ports:
+      - "3004:3004"
+
+  consumerone:
+    build:
+      context: ./consumerone
+    volumes:
+      - ./consumerone:/app
+    depends_on:
+      - redpanda
+    ports:
+      - "3005:3005"
+
+  consumerfilters:
+    build:
+      context: ./consumerfilters
+    volumes:
+      - ./consumerfilters:/app
+    depends_on:
+      - redpanda
+    ports:
+      - "3006:3006"

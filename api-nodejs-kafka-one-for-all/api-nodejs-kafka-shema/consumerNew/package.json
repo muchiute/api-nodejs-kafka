@@ -1,0 +1,19 @@
+{
+    "name": "consumernew",
+    "version": "1.0.0",
+    "description": "",
+    "main": "consumernew.js",
+    "scripts": {
+        "start": "node consumernew.js"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "avsc": "^5.7.7",
+        "express": "^4.19.2",
+        "fs": "^0.0.1-security",
+        "kafkajs": "^2.2.4",
+        "path": "^0.12.7",
+        "uuid": "^10.0.0"
+    }
+}
